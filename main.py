@@ -1,49 +1,66 @@
 import os
 import sys
-from PyQt5.QtWidgets import QApplication, QGridLayout, QLineEdit, QMainWindow, QSizePolicy, QStyleFactory, QWidget, QLabel, QComboBox
-from PyQt5.QtCore import Qt
-
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from convert import Convert
 class MainWindow(QMainWindow):
 
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
+        self.initUI()
 
+    def initUI(self):
         self.setWindowTitle("Unit Converter")
 
-        self.setFixedHeight(500)
-        self.setFixedWidth(1000)
+        self.setMinimumHeight(100)
+        self.setMinimumWidth(500)
 
-        layout = QGridLayout()
+        self.layout = QGridLayout()
 
-        comboBoxOne = QComboBox(self)
-        comboBoxOne.size()
-        list_one = ['a', 'b', 'c']
-        comboBoxOne.addItems(list_one)
+        self.bar = self.menuBar()
+        self.fileMenu = self.bar.addMenu('File')
+        self.editMenu = self.bar.addMenu('Edit')
 
-        comboBoxTwo = QComboBox(self)
-        comboBoxTwo.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
-        list_two = ['d', 'e', 'f']
-        comboBoxTwo.addItems(list_two)
+        self.length_list = ['Kilometers', 'Meters', 'Centimeters', 'Millimeters', 'Micrometers', 'Nanometers']
 
-        textBoxOne = QLineEdit(self)
-        textBoxTwo = QLineEdit(self)
-        textBoxTwo.setReadOnly(True)
+        self.comboBoxOne = QComboBox(self)
+        self.comboBoxOne.addItems(self.length_list)
+        self.comboBoxTwo = QComboBox(self)
+        self.comboBoxTwo.addItems(self.length_list)
 
-        layout.addWidget(comboBoxOne, 0, 0)
-        layout.addWidget(textBoxOne, 0, 1)
-        layout.addWidget(QLabel(''), 1, 0)
-        layout.addWidget(QLabel(''), 2, 0)
-        layout.addWidget(comboBoxTwo, 3, 0)
-        layout.addWidget(textBoxTwo, 3, 1)
+        self.textBoxOne = QLineEdit(self)
+        self.textBoxOne.setText('0.0')
+        self.textBoxTwo = QLineEdit(self)
+        self.textBoxTwo.setReadOnly(True)
 
+        self.convertButton = QPushButton(text = 'Convert!')
+        self.convertButton.clicked.connect(lambda *args: self.convert())
+
+        self.textBoxOne.textChanged[str].connect(lambda *args: self.convert())
+
+        self.layout.addWidget(self.textBoxTwo, 0, 1)
+        self.layout.addWidget(self.textBoxOne, 0, 0)
+        self.layout.addWidget(self.comboBoxOne, 1, 0)
+        self.layout.addWidget(self.comboBoxTwo, 1, 1)
+        self.layout.addWidget(self.convertButton, 2, 0, 1, 2)
         widget = QWidget()
-        widget.setLayout(layout)
+        widget.setLayout(self.layout)
         self.setCentralWidget(widget)
 
-app = QApplication(sys.argv)
-app.setStyle('windowsvista')
+    def convert(self):
+        try:
+            newVal = float(self.textBoxOne.text()) * Convert.factor_dictionary[self.comboBoxOne.currentText()] / Convert.factor_dictionary[self.comboBoxTwo.currentText()]
+            self.textBoxTwo.setText(str(newVal))
+        except ValueError:
+            self.textBoxTwo.setText('Value Error!')
 
-window = MainWindow()
-window.show()
+def main():
+    app = QApplication(sys.argv)
+    app.setStyle('windowsvista')
+    window = MainWindow()
+    window.show()
+    app.exec_()
 
-app.exec_()
+if __name__=='__main__':
+    main()
