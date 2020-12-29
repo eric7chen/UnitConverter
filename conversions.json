@@ -1,1 +1,1 @@
-{"Kilometers": 1000, "Meters": 1, "Centimeters": 0.01, "Millimeters": 0.001, "Micrometers": 1e-06, "Nanometers": 1e-09}
+{"Length": {"Kilometers": 1000, "Meters": 1, "Centimeters": 0.01, "Millimeters": 0.001, "Micrometers": 1e-06, "Nanometers": 1e-09}, "Time": {"Minutes": 1, "Hours": 60}}
