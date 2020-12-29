@@ -46,9 +46,11 @@ class MainWindow(QMainWindow):
         self.length_list = list(self.conversions.keys())
 
         self.comboBoxOne = QComboBox(self)
-        self.comboBoxOne.addItems(self.length_list)
+        # self.comboBoxOne.addItems(self.length_list)
         self.comboBoxTwo = QComboBox(self)
-        self.comboBoxTwo.addItems(self.length_list)
+        # self.comboBoxTwo.addItems(self.length_list)
+
+        self.set_units()
 
         #Text Input/Output
         self.textBoxOne = QLineEdit(self)
@@ -64,6 +66,7 @@ class MainWindow(QMainWindow):
         self.textBoxOne.textChanged[str].connect(lambda *args: self.convert())
         self.comboBoxOne.currentTextChanged.connect(lambda *args: self.convert())
         self.comboBoxTwo.currentTextChanged.connect(lambda *args: self.convert())
+        self.unitType.currentTextChanged.connect(lambda *args: self.set_units())
 
         self.layout.addWidget(self.unitType, 0, 0, 1, 2)
         self.layout.addWidget(self.textBoxTwo, 1, 1)
@@ -91,13 +94,20 @@ class MainWindow(QMainWindow):
         #Add conversion
         self.addConversion = QAction('Add')
 
+    def set_units(self):
+        self.comboBoxOne.clear()
+        self.comboBoxTwo.clear()
+        self.comboBoxOne.addItems(self.conversions[self.unitType.currentText()])
+        self.comboBoxTwo.addItems(self.conversions[self.unitType.currentText()])
 
     def convert(self):
         try:
-            newVal = float(self.textBoxOne.text()) * self.conversions[self.comboBoxOne.currentText()] / self.conversions[self.comboBoxTwo.currentText()]
+            newVal = float(self.textBoxOne.text()) * self.conversions[self.unitType.currentText()][self.comboBoxOne.currentText()] / self.conversions[self.unitType.currentText()][self.comboBoxTwo.currentText()]
             self.textBoxTwo.setText(str(newVal))
         except ValueError:
             self.textBoxTwo.setText('Value Error!')
+        except KeyError:
+            self.textBoxTwo.setText('Key Error!')
     
     # def chooseUnit(self):
 
@@ -108,15 +118,32 @@ class MainWindow(QMainWindow):
         self.set.resize(500, 500)
         self.set.setWindowTitle('Unit Conversions')
 
-        self.menuLayout = QVBoxLayout()
+        self.menuLayout = QHBoxLayout()
 
         self.unit_type_list = QListWidget()
         self.unit_type_list.addItems(self.conversions.keys())
+
+        self.available_units = QListWidget()
+
         self.menuLayout.addWidget(self.unit_type_list)
+        self.menuLayout.addWidget(self.available_units)
+
+        self.menuLayout.addStretch()
+
+        self.conversionFactor = QLineEdit()
+        self.conversionFactor.setReadOnly(True)
+        self.menuLayout.addWidget(self.conversionFactor)
+
+        self.unit_type_list.itemSelectionChanged.connect(lambda *args: self.updateAvailableUnits())
+        self.available_units.itemSelectionChanged.connect(lambda *args: self.conversionFactor.setText(str(self.conversions[self.unit_type_list.currentItem().text()][self.available_units.currentItem().text()])))
 
         self.set.setLayout(self.menuLayout)
-
         self.set.exec_()
+    
+    def updateAvailableUnits(self):
+        self.available_units.clear()
+        self.available_units.addItems(self.conversions[self.unit_type_list.currentItem().text()].keys())
+        self.conversionFactor.clear()
 
 def main():
     app = QApplication(sys.argv)
