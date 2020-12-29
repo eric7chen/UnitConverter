@@ -3,10 +3,13 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from convert import Convert
+import json
+
 class MainWindow(QMainWindow):
 
     def __init__(self, *args, **kwargs):
+        with open('conversions.json', 'r') as c:
+            self.conversions = json.load(c)
         super(MainWindow, self).__init__(*args, **kwargs)
         self.initUI()
 
@@ -22,7 +25,7 @@ class MainWindow(QMainWindow):
         self.fileMenu = self.bar.addMenu('File')
         self.editMenu = self.bar.addMenu('Edit')
 
-        self.length_list = ['Kilometers', 'Meters', 'Centimeters', 'Millimeters', 'Micrometers', 'Nanometers']
+        self.length_list = list(self.conversions.keys())
 
         self.comboBoxOne = QComboBox(self)
         self.comboBoxOne.addItems(self.length_list)
@@ -38,6 +41,8 @@ class MainWindow(QMainWindow):
         self.convertButton.clicked.connect(lambda *args: self.convert())
 
         self.textBoxOne.textChanged[str].connect(lambda *args: self.convert())
+        self.comboBoxOne.currentTextChanged.connect(lambda *args: self.convert())
+        self.comboBoxTwo.currentTextChanged.connect(lambda *args: self.convert())
 
         self.layout.addWidget(self.textBoxTwo, 0, 1)
         self.layout.addWidget(self.textBoxOne, 0, 0)
@@ -49,8 +54,9 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
 
     def convert(self):
+
         try:
-            newVal = float(self.textBoxOne.text()) * Convert.factor_dictionary[self.comboBoxOne.currentText()] / Convert.factor_dictionary[self.comboBoxTwo.currentText()]
+            newVal = float(self.textBoxOne.text()) * self.conversions[self.comboBoxOne.currentText()] / self.conversions[self.comboBoxTwo.currentText()]
             self.textBoxTwo.setText(str(newVal))
         except ValueError:
             self.textBoxTwo.setText('Value Error!')
